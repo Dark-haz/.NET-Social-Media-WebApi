@@ -11,11 +11,11 @@ namespace Social_Media_API.Data
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        
+
         public DbSet<Post> Posts { get; set; }
 
         //! SEEDING
-        
+
         protected override void  OnModelCreating(ModelBuilder modelBuilder){
             var faker = new Faker(); //faker
 

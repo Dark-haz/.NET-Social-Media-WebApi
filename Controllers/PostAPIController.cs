@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Social_Media_API.Models;
 using Social_Media_API.Models.DTO;
 using Social_Media_API.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.EntityFrameworkCore;
 
 namespace Social_Media_API.Controllers
 {
@@ -20,11 +22,13 @@ namespace Social_Media_API.Controllers
     {
 
         private readonly ILogger<PostAPIController> _logger;
+        private readonly AppDbContext _db ;
 
-        public PostAPIController(ILogger<PostAPIController> logger)
+        public PostAPIController(ILogger<PostAPIController> logger , AppDbContext db)
         {
             //for logging
             _logger = logger;    
+            _db = db;
         }
 
 
@@ -34,7 +38,7 @@ namespace Social_Media_API.Controllers
         {
             // return PostStore.postList;
             _logger.LogInformation("Returning whole table");
-            return Ok(PostStore.postList); //returns 200 ok w/ content
+            return Ok(_db.Posts.ToList()); //returns 200 ok w/ content
         }
         
 
@@ -52,7 +56,7 @@ namespace Social_Media_API.Controllers
                 return BadRequest();
             }
 
-            var post = PostStore.postList.FirstOrDefault(p=>p.Id == id);
+            var post = _db.Posts.FirstOrDefault(p=>p.Id == id);
 
             if(post == null){
                 return NotFound();
@@ -88,18 +92,26 @@ namespace Social_Media_API.Controllers
 
             //! CUSTOM ERROR
             //unique constraint
-            if(PostStore.postList.FirstOrDefault(e=>e.Title.ToLower() == postDTO.Title.ToLower()) != null ){
+            if(_db.Posts.FirstOrDefault(e=>e.Title.ToLower() == postDTO.Title.ToLower()) != null ){
                 // custom error message
                                         //unique key  ,  error message
                 ModelState.AddModelError("CustomError","Title already exists!");
                 return BadRequest(ModelState);
             }
 
-            //retrieving highest id in list + 1
-            postDTO.Id = PostStore.postList.OrderByDescending(u=>u.Id).FirstOrDefault().Id + 1;
+            //retrieving highest id in list + 1 , //! not needed in ef core --> auto increment
+            // postDTO.Id = PostStore.postList.OrderByDescending(u=>u.Id).FirstOrDefault().Id + 1;
 
-            //adding it to list 
-            PostStore.postList.Add(postDTO);
+            //adding it to DB
+            Post model = new Post{
+                Id = postDTO.Id,
+                Title = postDTO.Title,
+                Description = postDTO.Description,
+                ImageUrl = postDTO.ImageUrl,
+            };
+
+            _db.Posts.Add(model);
+            _db.SaveChanges();
 
             //return create object with new id
             // return Ok(postDTO);
@@ -120,12 +132,13 @@ namespace Social_Media_API.Controllers
         {
             if(id == 0){return BadRequest();}
 
-            var post = PostStore.postList.FirstOrDefault(e=> e.Id == id);
+            var post = _db.Posts.FirstOrDefault(e=> e.Id == id);
             if(post == null){
                 return NotFound();
             }
 
-            PostStore.postList.Remove(post);
+            _db.Posts.Remove(post);
+            _db.SaveChanges();
 
             return NoContent(); //in deleting we return nothing
         }
@@ -140,10 +153,15 @@ namespace Social_Media_API.Controllers
             return BadRequest();
         }
 
-        var post = PostStore.postList.FirstOrDefault(e=>e.Id == id);
+        Post model = new Post{
+            Id = postDTO.Id,
+            Title = postDTO.Title,
+            Description = postDTO.Description,
+            ImageUrl = postDTO.ImageUrl,
+        };
 
-        //update all properties of object
-        post.Title = postDTO.Title;
+        _db.Posts.Update(model);
+        _db.SaveChanges();
 
         return NoContent();
     }
@@ -162,17 +180,40 @@ namespace Social_Media_API.Controllers
             return BadRequest();
         }
 
-        var post = PostStore.postList.FirstOrDefault(e=>e.Id == id);
+        //! get copy no tracking, since can't track same id multiple times
+        var post = _db.Posts.AsNoTracking().FirstOrDefault(e=>e.Id == id);
+
         if(post == null){
             return NotFound();
         }
 
+        
+
+        //other way around convert //! model to DTO to use with patch
+         PostDTO modelDTO = new PostDTO{
+            Id = post.Id,
+            Title = post.Title,
+            Description = post.Description,
+            ImageUrl = post.ImageUrl,
+        };
+
         //update object
-        patchDTO.ApplyTo(post,ModelState); //** 2nd arg : if any errors store in modelstate
+        patchDTO.ApplyTo(modelDTO,ModelState); //** 2nd arg : if any errors store in modelstate
 
         if(!ModelState.IsValid){
             return BadRequest();
         }
+
+        //convert back to //! model to use with ef core
+        Post model = new Post{
+            Id = modelDTO.Id,
+            Title = modelDTO.Title,
+            Description = modelDTO.Description,
+            ImageUrl = modelDTO.ImageUrl,
+        };
+
+        _db.Posts.Update(model);
+        _db.SaveChanges();
 
         return NoContent();
 
