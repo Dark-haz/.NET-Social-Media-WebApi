@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "HKaFO3JqRQgFWuiATH7heCBpObXx6COdMWIOrBHlAuUTU8fKP/PMEg47ACXeA7Dsvbgyjk0Z0JwtnUyYeWQz9g==",
+  "dgSpecHash": "32D3PZ1A7MM28YZmxqI5aV3HTfeoo2CNZjEDcT3N+nJmfh2HLlxziuZKU/uvcbdg+H/wmOwW4I34ipaKeRrtQg==",
   "success": true,
   "projectFilePath": "/Users/apple/Desktop/Dotnet projects/Social_Media_API/Social_Media_API.csproj",
   "expectedPackageFiles": [
+    "/Users/apple/.nuget/packages/automapper/12.0.1/automapper.12.0.1.nupkg.sha512",
+    "/Users/apple/.nuget/packages/automapper.extensions.microsoft.dependencyinjection/12.0.1/automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
     "/Users/apple/.nuget/packages/bogus/34.0.2/bogus.34.0.2.nupkg.sha512",
     "/Users/apple/.nuget/packages/google.protobuf/3.21.9/google.protobuf.3.21.9.nupkg.sha512",
     "/Users/apple/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

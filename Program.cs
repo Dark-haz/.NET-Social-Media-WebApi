@@ -1,5 +1,6 @@
 using Social_Media_API.Data;
 using Microsoft.EntityFrameworkCore;
+using Social_Media_API.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,10 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultMysqlConnection") ?? throw new InvalidOperationException("Connection string 'DefaultMysqlConnection' not found.")));
+
+//! AUTOMAPPER
+
+builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

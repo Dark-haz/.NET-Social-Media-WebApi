@@ -9,6 +9,8 @@ using Social_Media_API.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+
 
 namespace Social_Media_API.Controllers
 {
@@ -23,12 +25,15 @@ namespace Social_Media_API.Controllers
 
         private readonly ILogger<PostAPIController> _logger;
         private readonly AppDbContext _db ;
+        private readonly IMapper _mapper;
 
-        public PostAPIController(ILogger<PostAPIController> logger , AppDbContext db)
+
+        public PostAPIController(ILogger<PostAPIController> logger , AppDbContext db ,IMapper mapper)
         {
             //for logging
             _logger = logger;    
             _db = db;
+            _mapper = mapper;
         }
 
 
@@ -40,7 +45,9 @@ namespace Social_Media_API.Controllers
         {
             // return PostStore.postList;
             _logger.LogInformation("Returning whole table");
-            return Ok(await _db.Posts.ToListAsync()); //returns 200 ok w/ content
+            IEnumerable<Post> postList = await _db.Posts.ToListAsync();
+
+            return Ok(_mapper.Map<List<PostDTO>>(postList)); //returns 200 ok w/ content
         }
         
     //> GET ONE |-----------------------------------
@@ -59,13 +66,14 @@ namespace Social_Media_API.Controllers
                 return BadRequest();
             }
 
+
             var post = await _db.Posts.FirstOrDefaultAsync(p=>p.Id == id);
 
             if(post == null){
                 return NotFound();
             }
 
-            return Ok(post);
+            return Ok(_mapper.Map<PostDTO>(post));
         }
 
      //> CREATE |-----------------------------------
@@ -75,7 +83,7 @@ namespace Social_Media_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public async Task<ActionResult<PostDTO>> CreatePost([FromBody] CreatePostDTO postDTO){
+        public async Task<ActionResult<PostDTO>> CreatePost([FromBody] CreatePostDTO createDTO){
 
             //! if [ApiController] removed  or custom validation
             //! need to EXPLICITLY CHECK
@@ -84,13 +92,13 @@ namespace Social_Media_API.Controllers
             // }
 
             //*Validation
-            if(postDTO == null){
-                return BadRequest(postDTO);
+            if(createDTO == null){
+                return BadRequest(createDTO);
             }
 
             //! CUSTOM ERROR
             //unique constraint
-            if(await _db.Posts.FirstOrDefaultAsync(e=>e.Title.ToLower() == postDTO.Title.ToLower()) != null ){
+            if(await _db.Posts.FirstOrDefaultAsync(e=>e.Title.ToLower() == createDTO.Title.ToLower()) != null ){
                 // custom error message
                                         //unique key  ,  error message
                 ModelState.AddModelError("CustomError","Title already exists!");
@@ -100,18 +108,15 @@ namespace Social_Media_API.Controllers
             //retrieving highest id in list + 1 , //! not needed in ef core --> auto increment
 
             //adding it to DB
-            Post model = new Post{
-                Title = postDTO.Title,
-                Description = postDTO.Description,
-                ImageUrl = postDTO.ImageUrl,
-                // CreatedDate = something  //! it's missing for some reason
-            };
+            //* convert to post
+            Post model = _mapper.Map<Post>(createDTO);
+            
 
             await _db.Posts.AddAsync(model);
             await _db.SaveChangesAsync();
 
             //return create object with new id
-            // return Ok(postDTO);
+            // return Ok(createDTO);
 
             // instead of returning OK
             //! usually route LOCATION where created record can be retrievd is returned
@@ -147,19 +152,13 @@ namespace Social_Media_API.Controllers
     [HttpPut("{id:int}" , Name = "UpdatePost")] //updates //! WHOLE object
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdatePost(int id, [FromBody] UpdatePostDTO postDTO)
+    public async Task<IActionResult> UpdatePost(int id, [FromBody] UpdatePostDTO updateDTO)
     {
-        if(postDTO == null || id != postDTO.Id){
+        if(updateDTO == null || id != updateDTO.Id){
             return BadRequest();
         }
 
-        Post model = new Post{
-            Id = postDTO.Id,
-            Title = postDTO.Title,
-            Description = postDTO.Description,
-            ImageUrl = postDTO.ImageUrl,
-        };
-
+        Post model = _mapper.Map<Post>(updateDTO);
         _db.Posts.Update(model);
         await _db.SaveChangesAsync();
 
@@ -190,12 +189,7 @@ namespace Social_Media_API.Controllers
         
 
         //other way around convert //! model to DTO to use with patch
-         UpdatePostDTO modelDTO = new UpdatePostDTO{
-            Id = post.Id,
-            Title = post.Title,
-            Description = post.Description,
-            ImageUrl = post.ImageUrl,
-        };
+         UpdatePostDTO modelDTO = _mapper.Map<UpdatePostDTO>(post);
 
         //update object
         patchDTO.ApplyTo(modelDTO,ModelState); //** 2nd arg : if any errors store in modelstate
@@ -205,12 +199,7 @@ namespace Social_Media_API.Controllers
         }
 
         //convert back to //! model to use with ef core
-        Post model = new Post{
-            Id = modelDTO.Id,
-            Title = modelDTO.Title,
-            Description = modelDTO.Description,
-            ImageUrl = modelDTO.ImageUrl,
-        };
+        Post model = _mapper.Map<Post>(modelDTO);
 
         _db.Posts.Update(model);
         await _db.SaveChangesAsync();
