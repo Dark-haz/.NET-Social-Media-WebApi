@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Social_Media_API.Services.Repository;
 
 
 namespace Social_Media_API.Controllers
@@ -24,15 +25,15 @@ namespace Social_Media_API.Controllers
     {
 
         private readonly ILogger<PostAPIController> _logger;
-        private readonly AppDbContext _db ;
+        private readonly IPostRepository _dbPost ;
         private readonly IMapper _mapper;
 
 
-        public PostAPIController(ILogger<PostAPIController> logger , AppDbContext db ,IMapper mapper)
+        public PostAPIController(ILogger<PostAPIController> logger , IPostRepository dbPost ,IMapper mapper)
         {
             //for logging
             _logger = logger;    
-            _db = db;
+            _dbPost = dbPost;
             _mapper = mapper;
         }
 
@@ -45,7 +46,7 @@ namespace Social_Media_API.Controllers
         {
             // return PostStore.postList;
             _logger.LogInformation("Returning whole table");
-            IEnumerable<Post> postList = await _db.Posts.ToListAsync();
+            IEnumerable<Post> postList = await _dbPost.GetAllAsync();
 
             return Ok(_mapper.Map<List<PostDTO>>(postList)); //returns 200 ok w/ content
         }
@@ -67,7 +68,7 @@ namespace Social_Media_API.Controllers
             }
 
 
-            var post = await _db.Posts.FirstOrDefaultAsync(p=>p.Id == id);
+            var post = await _dbPost.GetAsync(e=>e.Id == id);
 
             if(post == null){
                 return NotFound();
@@ -98,7 +99,7 @@ namespace Social_Media_API.Controllers
 
             //! CUSTOM ERROR
             //unique constraint
-            if(await _db.Posts.FirstOrDefaultAsync(e=>e.Title.ToLower() == createDTO.Title.ToLower()) != null ){
+            if(await _dbPost.GetAsync(e=>e.Title.ToLower() == createDTO.Title.ToLower()) != null ){
                 // custom error message
                                         //unique key  ,  error message
                 ModelState.AddModelError("CustomError","Title already exists!");
@@ -111,9 +112,7 @@ namespace Social_Media_API.Controllers
             //* convert to post
             Post model = _mapper.Map<Post>(createDTO);
             
-
-            await _db.Posts.AddAsync(model);
-            await _db.SaveChangesAsync();
+            await _dbPost.CreateAsync(model);
 
             //return create object with new id
             // return Ok(createDTO);
@@ -136,13 +135,12 @@ namespace Social_Media_API.Controllers
         {
             if(id == 0){return BadRequest();}
 
-            var post = await _db.Posts.FirstOrDefaultAsync(e=> e.Id == id);
+            var post = await _dbPost.GetAsync(e=> e.Id == id);
             if(post == null){
                 return NotFound();
             }
 
-            _db.Posts.Remove(post);
-            await _db.SaveChangesAsync();
+            await _dbPost.RemoveAsync(post);
 
             return NoContent(); //in deleting we return nothing
         }
@@ -159,8 +157,7 @@ namespace Social_Media_API.Controllers
         }
 
         Post model = _mapper.Map<Post>(updateDTO);
-        _db.Posts.Update(model);
-        await _db.SaveChangesAsync();
+        await _dbPost.UpdateAsync(model);
 
         return NoContent();
     }
@@ -180,7 +177,7 @@ namespace Social_Media_API.Controllers
         }
 
         //! get copy no tracking, since can't track same id multiple times
-        var post = await _db.Posts.AsNoTracking().FirstOrDefaultAsync(e=>e.Id == id);
+        var post = await _dbPost.GetAsync(e=>e.Id == id,false);
 
         if(post == null){
             return NotFound();
@@ -201,8 +198,7 @@ namespace Social_Media_API.Controllers
         //convert back to //! model to use with ef core
         Post model = _mapper.Map<Post>(modelDTO);
 
-        _db.Posts.Update(model);
-        await _db.SaveChangesAsync();
+        await _dbPost.UpdateAsync(model);
 
         return NoContent();
 

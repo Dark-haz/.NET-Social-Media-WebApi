@@ -1,6 +1,7 @@
 using Social_Media_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Social_Media_API.Services;
+using Social_Media_API.Services.Repository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //! AUTOMAPPER
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+//! REPOSITORY
+builder.Services.AddScoped<IPostRepository,PostRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
