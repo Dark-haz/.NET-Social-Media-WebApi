@@ -32,31 +32,34 @@ namespace Social_Media_API.Controllers
         }
 
 
+    //> GET ALL |-----------------------------------
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<PostDTO>> GetPosts() //** ActionResult for response type
+        public async Task<ActionResult<IEnumerable<PostDTO>>> GetPosts() //** ActionResult for response type
         {
             // return PostStore.postList;
             _logger.LogInformation("Returning whole table");
-            return Ok(_db.Posts.ToList()); //returns 200 ok w/ content
+            return Ok(await _db.Posts.ToListAsync()); //returns 200 ok w/ content
         }
         
+    //> GET ONE |-----------------------------------
 
         // [HttpGet("id")]
         // Documenting possible response types
         // [ProducesResponseType(200,Type=typeof(PostDTO))] //! specify type if not returned in ActionResult
+        [HttpGet("{id:int}",Name = "GetPost")] // with type and explicit name (optional)
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpGet("{id:int}",Name = "GetPost")] // with type and explicit name (optional)
-        public ActionResult<PostDTO> GetPost(int id)
+        public async Task<ActionResult<PostDTO>> GetPost(int id)
         {
             if(id == 0){
                 _logger.LogError("Id doesn't exist!!");
                 return BadRequest();
             }
 
-            var post = _db.Posts.FirstOrDefault(p=>p.Id == id);
+            var post = await _db.Posts.FirstOrDefaultAsync(p=>p.Id == id);
 
             if(post == null){
                 return NotFound();
@@ -65,13 +68,14 @@ namespace Social_Media_API.Controllers
             return Ok(post);
         }
 
+     //> CREATE |-----------------------------------
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
-        public ActionResult<PostDTO> CreatePost([FromBody] PostDTO postDTO){
+        public async Task<ActionResult<PostDTO>> CreatePost([FromBody] CreatePostDTO postDTO){
 
             //! if [ApiController] removed  or custom validation
             //! need to EXPLICITLY CHECK
@@ -84,15 +88,9 @@ namespace Social_Media_API.Controllers
                 return BadRequest(postDTO);
             }
 
-            if(postDTO.Id>0){ //>0 --> not a create request
-
-                //return custom status not in default ActionResult
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
             //! CUSTOM ERROR
             //unique constraint
-            if(_db.Posts.FirstOrDefault(e=>e.Title.ToLower() == postDTO.Title.ToLower()) != null ){
+            if(await _db.Posts.FirstOrDefaultAsync(e=>e.Title.ToLower() == postDTO.Title.ToLower()) != null ){
                 // custom error message
                                         //unique key  ,  error message
                 ModelState.AddModelError("CustomError","Title already exists!");
@@ -100,18 +98,17 @@ namespace Social_Media_API.Controllers
             }
 
             //retrieving highest id in list + 1 , //! not needed in ef core --> auto increment
-            // postDTO.Id = PostStore.postList.OrderByDescending(u=>u.Id).FirstOrDefault().Id + 1;
 
             //adding it to DB
             Post model = new Post{
-                Id = postDTO.Id,
                 Title = postDTO.Title,
                 Description = postDTO.Description,
                 ImageUrl = postDTO.ImageUrl,
+                // CreatedDate = something  //! it's missing for some reason
             };
 
-            _db.Posts.Add(model);
-            _db.SaveChanges();
+            await _db.Posts.AddAsync(model);
+            await _db.SaveChangesAsync();
 
             //return create object with new id
             // return Ok(postDTO);
@@ -120,34 +117,37 @@ namespace Social_Media_API.Controllers
             //! usually route LOCATION where created record can be retrievd is returned
                                  //** route name ,   parameter           , createdobject
                                  //! get villa is invoked 
-            return CreatedAtRoute("GetPost" , new { id = postDTO.Id} , postDTO); //returns 201
+            return CreatedAtRoute("GetPost" , new { id = model.Id} , model); //returns 201
         }
     
 
+     //> DELETE |-----------------------------------
+
+        [HttpDelete("{id:int}" , Name = "DeletePost")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpDelete("{id:int}" , Name = "DeletePost")]
-        public IActionResult DeletePost(int id)
+        public async Task<IActionResult> DeletePost(int id)
         {
             if(id == 0){return BadRequest();}
 
-            var post = _db.Posts.FirstOrDefault(e=> e.Id == id);
+            var post = await _db.Posts.FirstOrDefaultAsync(e=> e.Id == id);
             if(post == null){
                 return NotFound();
             }
 
             _db.Posts.Remove(post);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
 
             return NoContent(); //in deleting we return nothing
         }
     
-
+    //>  PUT|-----------------------------------
+    
+    [HttpPut("{id:int}" , Name = "UpdatePost")] //updates //! WHOLE object
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [HttpPut("{id:int}" , Name = "UpdatePost")] //updates //! WHOLE object
-    public IActionResult UpdatePost(int id, [FromBody] PostDTO postDTO)
+    public async Task<IActionResult> UpdatePost(int id, [FromBody] UpdatePostDTO postDTO)
     {
         if(postDTO == null || id != postDTO.Id){
             return BadRequest();
@@ -161,27 +161,27 @@ namespace Social_Media_API.Controllers
         };
 
         _db.Posts.Update(model);
-        _db.SaveChanges();
+        await _db.SaveChangesAsync();
 
         return NoContent();
     }
 
 
-    // HTTP PATCH  |-----------------------------------
+    //> PATCH  |-----------------------------------
     //TODO check jsonpatch site for more info
     //NEED NUGGET PACKAGES  and Add to services
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPatch("{id:int}" , Name = "UpdatePartialPost")] //! updates one property at a time
-    public IActionResult UpdatePartialPost(int id , JsonPatchDocument<PostDTO> patchDTO)
+    public async Task<ActionResult> UpdatePartialPost(int id , JsonPatchDocument<UpdatePostDTO> patchDTO)
     {
         if(patchDTO == null || id == 0){
             return BadRequest();
         }
 
         //! get copy no tracking, since can't track same id multiple times
-        var post = _db.Posts.AsNoTracking().FirstOrDefault(e=>e.Id == id);
+        var post = await _db.Posts.AsNoTracking().FirstOrDefaultAsync(e=>e.Id == id);
 
         if(post == null){
             return NotFound();
@@ -190,7 +190,7 @@ namespace Social_Media_API.Controllers
         
 
         //other way around convert //! model to DTO to use with patch
-         PostDTO modelDTO = new PostDTO{
+         UpdatePostDTO modelDTO = new UpdatePostDTO{
             Id = post.Id,
             Title = post.Title,
             Description = post.Description,
@@ -213,7 +213,7 @@ namespace Social_Media_API.Controllers
         };
 
         _db.Posts.Update(model);
-        _db.SaveChanges();
+        await _db.SaveChangesAsync();
 
         return NoContent();
 
