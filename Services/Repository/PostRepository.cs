@@ -9,54 +9,22 @@ using Social_Media_API.Models;
 
 namespace Social_Media_API.Services.Repository
 {
-    public class PostRepository : IPostRepository
+    public class PostRepository : Repository<Post> , IPostRepository
     {
         private readonly AppDbContext _db;
 
-        public PostRepository(AppDbContext db)
+        public PostRepository(AppDbContext db) : base(db)
         {
             _db = db; //to talk with db
         }
 
-        public async Task CreateAsync(Post entity)
+
+        public async Task<Post> UpdateAsync(Post entity)
         {
-            await _db.Posts.AddAsync(entity);
-            await SaveAsync();
-        }
-
-        
-
-        public async Task<Post> GetAsync(Expression<Func<Post,bool>> filter = null, bool tracked = true)
-        {
-            IQueryable<Post> query = _db.Posts; //doesn't get executed right away , stores query
-            if(!tracked){query.AsNoTracking();}
-            if(filter != null) {query = query.Where(filter);} //optional filter (not so much)
-            return await query.FirstOrDefaultAsync(); //executes
-        }
-
-        public async Task<List<Post>> GetAllAsync(Expression<Func<Post,bool>> filter = null)
-        {
-            IQueryable<Post> query = _db.Posts; //doesn't get executed right away , stores query
-
-            if(filter != null) {query = query.Where(filter);} //optional filter
-            return await query.ToListAsync(); //executes
-        }
-
-        public async Task RemoveAsync(Post entity)
-        {
-            _db.Posts.Remove(entity);
-            await SaveAsync();
-        }
-
-        public async Task SaveAsync()
-        {
+            entity.UpdatedDate = DateTime.Now; //different update than generic
+            _db.Posts.Update(entity);
             await _db.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(Post entity)
-        {
-            _db.Update(entity);
-            await SaveAsync();
+            return entity;
         }
     }
 }

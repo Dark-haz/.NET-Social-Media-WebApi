@@ -77,7 +77,7 @@ namespace Social_Media_API.Controllers
             return Ok(_mapper.Map<PostDTO>(post));
         }
 
-     //> CREATE |-----------------------------------
+    //> CREATE |-----------------------------------
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -125,7 +125,7 @@ namespace Social_Media_API.Controllers
         }
     
 
-     //> DELETE |-----------------------------------
+    //> DELETE |-----------------------------------
 
         [HttpDelete("{id:int}" , Name = "DeletePost")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -5,20 +5,24 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Social_Media_API.Models;
 using Social_Media_API.Models.DTO;
+using Social_Media_API.Services.Repository.IRepository;
 
 namespace Social_Media_API.Services.Repository
 {
-    public interface IPostRepository
+    public interface IPostRepository : IRepository<Post>
     {
         //> Store the needed functions to access database 
         //! Takes MODEL TYPE
+
+        //_ MOVED TO GENERIC
                                         // Func<in,out>
-        Task<List<Post>> GetAllAsync(Expression<Func<Post,bool>> filter = null); //if we need to filter it
-        Task<Post> GetAsync(Expression<Func<Post,bool>> filter = null , bool tracked = true); 
-        Task CreateAsync(Post entity); 
-        Task UpdateAsync(Post entity); 
-        Task RemoveAsync(Post entity);
-        Task SaveAsync();
+        // _ Task<List<Post>> GetAllAsync(Expression<Func<Post,bool>> filter = null); //if we need to filter it
+        //_ Task<Post> GetAsync(Expression<Func<Post,bool>> filter = null , bool tracked = true); 
+        //_ Task CreateAsync(Post entity); 
+        //_ Task RemoveAsync(Post entity);
+        //_ Task SaveAsync();
+        
+        Task<Post> UpdateAsync(Post entity); 
             
     }
 }

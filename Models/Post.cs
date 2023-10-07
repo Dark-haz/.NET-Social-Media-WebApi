@@ -23,6 +23,7 @@ namespace Social_Media_API.Models
         public String ImageUrl { get; set; }
 
         public DateTime CreatedDate { get; set; }
+        public DateTime UpdatedDate { get; set; }
 
     }
 }
