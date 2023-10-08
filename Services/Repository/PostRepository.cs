@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Social_Media_API.Data;
-using Social_Media_API.Models;
+using Social_Media_API.Models.PostModels;
+
 
 namespace Social_Media_API.Services.Repository
 {

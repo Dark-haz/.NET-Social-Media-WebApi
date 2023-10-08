@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace Social_Media_API.Models
+namespace Social_Media_API.Models.PostModels
 {
     // * used to save to DB 
     //! NOT to take user input

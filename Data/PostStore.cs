@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Social_Media_API.Models.DTO;
+using Social_Media_API.Models.PostModels;
 
 namespace Social_Media_API.Data
 {

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Social_Media_API.Models;
+using Social_Media_API.Models.PostModels;
 using Bogus;
+using Social_Media_API.Models.CommentModels;
 
 namespace Social_Media_API.Data
 {
@@ -13,6 +14,7 @@ namespace Social_Media_API.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         //! SEEDING
 

@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Social_Media_API.Models;
-using Social_Media_API.Models.DTO;
+using Social_Media_API.Models.CommentModels;
+using Social_Media_API.Models.PostModels;
 
 namespace Social_Media_API.Services
 {
@@ -17,6 +18,11 @@ namespace Social_Media_API.Services
             CreateMap<Post,CreatePostDTO>().ReverseMap();
 
             CreateMap<Post,UpdatePostDTO>().ReverseMap();
+
+            CreateMap<Comment,CommentDTO>().ReverseMap();
+            CreateMap<Comment,CreateCommentDTO>().ReverseMap();
+            CreateMap<Comment,UpdateCommentDTO>().ReverseMap();
+
         }
     }
 }

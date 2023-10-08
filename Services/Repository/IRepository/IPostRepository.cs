@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Social_Media_API.Models;
-using Social_Media_API.Models.DTO;
+using Social_Media_API.Models.PostModels;
 using Social_Media_API.Services.Repository.IRepository;
 
 namespace Social_Media_API.Services.Repository
