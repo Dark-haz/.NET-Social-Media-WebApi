@@ -16,7 +16,7 @@ namespace Social_Media_API.Models.CommentModels
         [ForeignKey("Post")]
         public int PostID { get; set; }
 
-        //! FOREIGN KEY MAPPER
+        //! FOREIGN KEY MAPPER NAVIGATION PROPERTY1
         public Post Post { get; set; }
     }
 }

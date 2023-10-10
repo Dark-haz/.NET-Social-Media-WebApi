@@ -18,6 +18,7 @@ namespace Social_Media_API.Services.Repository
         {
             _db = db; //to talk with db
             this.dbSet = _db.Set<T>();
+            // _db.Comments.Include(u=>u.Post).ToList(); //! navigation property automatically populated
         }
 
         public async Task CreateAsync(T entity)
@@ -26,19 +27,38 @@ namespace Social_Media_API.Services.Repository
             await SaveAsync();
         }
 
-        public async Task<T> GetAsync(Expression<Func<T,bool>> filter = null, bool tracked = true)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> filter = null, bool tracked = true, string? includeNavigations = null)
         {
             IQueryable<T> query = dbSet; //doesn't get executed right away , stores query
-            if(!tracked){query.AsNoTracking();}
-            if(filter != null) {query = query.Where(filter);} //optional filter (not so much)
+            if (!tracked) { query.AsNoTracking(); }
+            if (filter != null) { query = query.Where(filter); } //optional filter (not so much)
+            if (includeNavigations != null)
+            {
+                //split
+                foreach (var includeNavigation in includeNavigations.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeNavigation); //include navigation individuallys
+                }
+            }
             return await query.FirstOrDefaultAsync(); //executes
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T,bool>> ? filter = null)
+        //! comma separated string for navigation properties to be included
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeNavigations = null)
         {
             IQueryable<T> query = dbSet; //doesn't get executed right away , stores query
 
-            if(filter != null) {query = query.Where(filter);} //optional filter
+            if (filter != null) { query = query.Where(filter); } //optional filter
+
+            if (includeNavigations != null)
+            {
+                //split
+                foreach (var includeNavigation in includeNavigations.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeNavigation); //include navigation individuallys
+                }
+            }
+
             return await query.ToListAsync(); //executes
         }
 

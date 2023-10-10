@@ -41,7 +41,7 @@ namespace Social_Media_API.Controllers
             try
             {
 
-                IEnumerable<Comment> commentList = await _dbComment.GetAllAsync();
+                IEnumerable<Comment> commentList = await _dbComment.GetAllAsync(null,"Post");
                 _response.Result = _mapper.Map<List<CommentDTO>>(commentList);
                 _response.StatusCode = HttpStatusCode.OK;
 
@@ -71,7 +71,7 @@ namespace Social_Media_API.Controllers
                     return BadRequest(_response);
                 }
 
-                var comment = await _dbComment.GetAsync(e => e.Id == id);
+                var comment = await _dbComment.GetAsync(e => e.Id == id,true,"Post");
 
                 if (comment == null)
                 {

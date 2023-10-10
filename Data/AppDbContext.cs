@@ -18,28 +18,56 @@ namespace Social_Media_API.Data
 
         //! SEEDING
 
-        protected override void  OnModelCreating(ModelBuilder modelBuilder){
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
             var faker = new Faker(); //faker
 
-            var postList = new List<Post>{}; //seed data list
+            //! SEED POSTS
+
+            var postList = new List<Post> { }; //seed data list
 
             for (int i = 1; i <= 10; i++) //number of posts
             {
                 var random = new Random(); //random numbers
 
-                var fakepost = new Post{ //create fake post
+                var fakepost = new Post
+                { //create fake post
                     Id = i,
-                    Title = faker.Lorem.Sentence(random.Next(2,5)),
-                    Description = faker.Lorem.Paragraph(random.Next(2,3)),
+
+                    Title = faker.Lorem.Sentence(random.Next(2, 5)),
+                    Description = faker.Lorem.Paragraph(random.Next(2, 3)),
                     ImageUrl = "",
                     CreatedDate = DateTime.Now
-                }; 
+                };
 
                 postList.Add(fakepost); //add post to seed list
             }
 
             modelBuilder.Entity<Post>().HasData( //insert to post table
                 postList
+            );
+
+            //! SEED COMMENTS
+
+            var commentList = new List<Comment> { }; //seed data list
+
+            for (int i = 1; i <= 5; i++) //number of comments
+            {
+                var random = new Random(); //random numbers
+
+                var fakecomment = new Comment
+                { //create fake comment
+                    Id = i,
+                    Description = faker.Lorem.Paragraph(random.Next(2, 3)),
+                    CreatedDate = DateTime.Now,
+                    PostID= random.Next(1, 10)
+                };
+
+                commentList.Add(fakecomment); //add post to seed list
+            }
+
+            modelBuilder.Entity<Comment>().HasData( //insert to comment table
+                commentList
             );
         }
     }

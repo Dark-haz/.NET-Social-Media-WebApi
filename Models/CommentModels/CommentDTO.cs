@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Social_Media_API.Models.PostModels;
 
 namespace Social_Media_API.Models.CommentModels
 {
@@ -17,5 +18,8 @@ namespace Social_Media_API.Models.CommentModels
         //! FOREIGN KEY REQUIRED
         [Required]
         public int PostID { get; set; }
+
+        //! NAVIGATION PROPERTY DTO 
+        public PostDTO Post { get; set; }
     }
 }
