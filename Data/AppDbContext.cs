@@ -6,15 +6,20 @@ using Microsoft.EntityFrameworkCore;
 using Social_Media_API.Models.PostModels;
 using Bogus;
 using Social_Media_API.Models.CommentModels;
+using Social_Media_API.Models.UserModels;
 
 namespace Social_Media_API.Data
 {
     public class AppDbContext : DbContext
     {
+
+        
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<User> Users { get; set; }
 
         //! SEEDING
 
@@ -60,7 +65,7 @@ namespace Social_Media_API.Data
                     Id = i,
                     Description = faker.Lorem.Paragraph(random.Next(2, 3)),
                     CreatedDate = DateTime.Now,
-                    PostID= random.Next(1, 10)
+                    PostID = random.Next(1, 10)
                 };
 
                 commentList.Add(fakecomment); //add post to seed list
@@ -69,6 +74,23 @@ namespace Social_Media_API.Data
             modelBuilder.Entity<Comment>().HasData( //insert to comment table
                 commentList
             );
+
+            //! SEED USER
+            var addUser = new List<User>{
+                new User{
+                Id = 1,
+                Username = "Dio",
+                Password = "hello",
+                Role = "Admin"
+                },
+                new User{
+                Id = 2,
+                Username = "Jotaro",
+                Password = "hi",
+                Role = "Normal"
+                }
+            };
+            modelBuilder.Entity<User>().HasData(addUser);
         }
     }
 }

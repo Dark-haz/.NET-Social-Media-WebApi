@@ -25,6 +25,7 @@ builder.Services.AddAutoMapper(typeof(MappingConfig));
 //! REPOSITORY
 builder.Services.AddScoped<IPostRepository,PostRepository>();
 builder.Services.AddScoped<ICommentRepository,CommentRepository>();
+builder.Services.AddScoped<IUserRepository,UserRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
