@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Social_Media_API.Models;
 using Social_Media_API.Models.CommentModels;
@@ -35,6 +36,7 @@ namespace Social_Media_API.Controllers
         //> GET ALL |-----------------------------------
 
         [HttpGet]
+        [Authorize(Roles ="Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetComments()
         {
@@ -58,6 +60,7 @@ namespace Social_Media_API.Controllers
         //> GET ONE |-----------------------------------
 
         [HttpGet("{id:int}", Name = "GetComment")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
