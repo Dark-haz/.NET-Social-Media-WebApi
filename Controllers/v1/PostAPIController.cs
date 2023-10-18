@@ -7,7 +7,7 @@ using Social_Media_API.Services.Repository;
 using System.Net;
 
 
-namespace Social_Media_API.Controllers
+namespace Social_Media_API.Controllers.v1
 {
     //api controller
     [ApiController] //enables data annotations on models errors

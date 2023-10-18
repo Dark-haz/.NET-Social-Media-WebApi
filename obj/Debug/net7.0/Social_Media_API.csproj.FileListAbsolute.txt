@@ -77,3 +77,5 @@
 /Users/apple/Desktop/Dotnet projects/Social_Media_API/bin/Debug/net7.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /Users/apple/Desktop/Dotnet projects/Social_Media_API/bin/Debug/net7.0/Microsoft.IdentityModel.Tokens.dll
 /Users/apple/Desktop/Dotnet projects/Social_Media_API/bin/Debug/net7.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/apple/Desktop/Dotnet projects/Social_Media_API/bin/Debug/net7.0/Microsoft.AspNetCore.Mvc.Versioning.dll
+/Users/apple/Desktop/Dotnet projects/Social_Media_API/bin/Debug/net7.0/Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer.dll

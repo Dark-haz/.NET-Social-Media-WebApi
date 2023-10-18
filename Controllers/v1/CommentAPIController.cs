@@ -11,10 +11,11 @@ using Social_Media_API.Models.CommentModels;
 using Social_Media_API.Services.Repository;
 using Social_Media_API.Services.Repository.IRepository;
 
-namespace Social_Media_API.Controllers
+namespace Social_Media_API.Controllers.v1
 {
     [ApiController]
-    [Route("api/CommentAPI")]
+    [Route("api/v{version:apiVersion}/CommentAPI")]
+    [ApiVersion("1.0")]
     public class CommentAPIController : ControllerBase
     {
 
@@ -36,9 +37,9 @@ namespace Social_Media_API.Controllers
         //> GET ALL |-----------------------------------
 
         [HttpGet]
-        [Authorize(Roles ="Admin")]
+        // [Authorize(Roles ="Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetComments()
+        public async Task<ActionResult<APIResponse>> GetComments() 
         {
             try
             {

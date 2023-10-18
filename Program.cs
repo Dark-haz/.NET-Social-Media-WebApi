@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Security.Policy;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,7 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header, //? location should be in header
         Scheme = "Bearer"
     });
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement()
     {
         {
@@ -91,7 +93,63 @@ builder.Services.AddSwaggerGen(options =>
             new List<string>()
         }
     });
+
+    //! DIFFERENT VERSIONS SWAGGER DOC CONTENT
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1.0",
+        Title = "Social_Media V1",
+        Description = "API to manage Social Media",
+        // TermsOfService = new Uri("bananapotato.noidea"),
+        // Contact = new OpenApiContact
+        // {
+        //     Name = "Dotnetmastery",
+        //     Url = new Uri("somewhere.noidea")
+        // },
+        // License = new OpenApiLicense
+        // {
+        //     Name = "Example License",
+        //     Url = new Uri("here.noidea")
+        // }
+    });
+
+    options.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Version = "v2.0",
+        Title = "Social_Media V2",
+        Description = "API to manage Social Media",
+        // TermsOfService = new Uri("bananapotato.noidea"),
+        // Contact = new OpenApiContact
+        // {
+        //     Name = "Dotnetmastery",
+        //     Url = new Uri("somewhere.noidea")
+        // },
+        // License = new OpenApiLicense
+        // {
+        //     Name = "Example License",
+        //     Url = new Uri("here.noidea")
+        // }
+    });
+    
 });
+
+//! VERSIONING
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+    options.ReportApiVersions = true; // returns supported api versions in header
+});
+
+//! PASS VERSION IN SWAGGER
+builder.Services.AddVersionedApiExplorer
+(
+    options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true; //auto sets version used in swagger url
+    }
+);
 
 var app = builder.Build();
 
@@ -99,7 +157,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(
+        //! DIFFERENT VERSIONS SWAGGER DOC
+        options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Social_Mediav1"); //url , name
+            options.SwaggerEndpoint("/swagger/v2/swagger.json", "Social_Mediav2"); 
+
+        }
+    );
 }
 
 app.UseHttpsRedirection();

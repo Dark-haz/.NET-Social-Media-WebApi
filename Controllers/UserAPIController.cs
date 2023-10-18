@@ -11,6 +11,8 @@ namespace Social_Media_API.Controllers
 {
     [ApiController]
     [Route("api/UserAuth")]
+    [ApiVersionNeutral]
+
     public class UserAPIController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
