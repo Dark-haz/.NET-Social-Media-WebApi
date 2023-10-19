@@ -44,11 +44,23 @@ namespace Social_Media_API.Services.Repository
         }
 
         //! comma separated string for navigation properties to be included
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeNavigations = null)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeNavigations = null,
+        int pageSize = 0, int pageNumber = 1)
         {
             IQueryable<T> query = dbSet; //doesn't get executed right away , stores query
 
             if (filter != null) { query = query.Where(filter); } //optional filter
+
+            //!Pagination
+            if (pageSize > 0)
+            {
+                if (pageSize > 100) // max limit
+                {
+                    pageSize = 100;
+                }
+
+                query = query.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
+            }
 
             if (includeNavigations != null)
             {

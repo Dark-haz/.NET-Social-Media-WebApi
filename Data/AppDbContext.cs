@@ -65,7 +65,8 @@ namespace Social_Media_API.Data
                     Id = i,
                     Description = faker.Lorem.Paragraph(random.Next(2, 3)),
                     CreatedDate = DateTime.Now,
-                    PostID = random.Next(1, 10)
+                    PostID = random.Next(1, 10),
+                    Votes = random.Next(0,5)
                 };
 
                 commentList.Add(fakecomment); //add post to seed list

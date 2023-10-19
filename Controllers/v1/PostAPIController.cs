@@ -38,13 +38,20 @@ namespace Social_Media_API.Controllers.v1
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetPosts() //** ActionResult for response type
+        public async Task<ActionResult<APIResponse>> GetPosts([FromQuery(Name = "SearchQuery")] string? search) //** ActionResult for response type
         {
 
             try
             {
                 _logger.LogInformation("Returning whole table");
                 IEnumerable<Post> postList = await _dbPost.GetAllAsync();
+
+                //! APPLYING FITLER CODE 
+                if (!string.IsNullOrEmpty(search))
+                {
+                    postList = postList.Where(u=> u.Title.ToLower().Contains(search));
+                }
+
                 _response.Result = _mapper.Map<List<PostDTO>>(postList);
                 _response.StatusCode = HttpStatusCode.OK;
 

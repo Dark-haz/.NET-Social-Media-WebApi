@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Social_Media_API.Models
 {
+    //TODO : implement if status code other than 200-299 --> IsSucess = false
     public class APIResponse
     {
         public APIResponse()

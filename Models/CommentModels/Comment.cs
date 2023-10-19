@@ -18,5 +18,7 @@ namespace Social_Media_API.Models.CommentModels
 
         //! FOREIGN KEY MAPPER NAVIGATION PROPERTY1
         public Post Post { get; set; }
+
+        public int Votes { get; set; } //to test filtering
     }
 }

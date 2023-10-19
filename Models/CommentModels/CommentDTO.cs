@@ -21,5 +21,7 @@ namespace Social_Media_API.Models.CommentModels
 
         //! NAVIGATION PROPERTY DTO 
         public PostDTO Post { get; set; }
+
+        public int Votes { get; set; } //to test filtering
     }
 }

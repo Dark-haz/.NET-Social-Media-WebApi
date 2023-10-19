@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -37,14 +38,30 @@ namespace Social_Media_API.Controllers.v1
         //> GET ALL |-----------------------------------
 
         [HttpGet]
+        [ResponseCache(CacheProfileName = "Cache30")]
         // [Authorize(Roles ="Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetComments() 
+        public async Task<ActionResult<APIResponse>> GetComments([FromQuery(Name = "FilterByVote")] int? voteFilter, int pageSize = 0, int pageNumber = 1)
         {
             try
             {
 
-                IEnumerable<Comment> commentList = await _dbComment.GetAllAsync(null,"Post");
+                IEnumerable<Comment> commentList;
+
+                //! APPLYING FITLER DATABASE
+                if (voteFilter != null)
+                {
+                    commentList = await _dbComment.GetAllAsync(u => u.Votes == voteFilter, "Post");
+                }
+                else
+                {
+                    commentList = await _dbComment.GetAllAsync(null, "Post", pageSize, pageNumber);
+                }
+
+                //! ADDING APPLIED PAGINATION TO RESPONSE HEADER
+                Pagination pagination = new() { PageSize = pageSize, PageNumber = pageNumber };
+                Response.Headers.Add("Pagination", JsonSerializer.Serialize(pagination));
+
                 _response.Result = _mapper.Map<List<CommentDTO>>(commentList);
                 _response.StatusCode = HttpStatusCode.OK;
 
@@ -61,7 +78,8 @@ namespace Social_Media_API.Controllers.v1
         //> GET ONE |-----------------------------------
 
         [HttpGet("{id:int}", Name = "GetComment")]
-        [Authorize]
+        [ResponseCache(CacheProfileName = "Cache30")]
+        // [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -75,7 +93,7 @@ namespace Social_Media_API.Controllers.v1
                     return BadRequest(_response);
                 }
 
-                var comment = await _dbComment.GetAsync(e => e.Id == id,true,"Post");
+                var comment = await _dbComment.GetAsync(e => e.Id == id, true, "Post");
 
                 if (comment == null)
                 {

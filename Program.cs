@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Security.Policy;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 //! HTTP PATCH
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers
+(
+ options => 
+ {
+    options.CacheProfiles.Add("Cache30",
+        new CacheProfile(){
+            Duration = 30
+        }
+    );
+ }   
+).AddNewtonsoftJson();
 
 //! DB CONTEXT
 
@@ -150,6 +161,9 @@ builder.Services.AddVersionedApiExplorer
         options.SubstituteApiVersionInUrl = true; //auto sets version used in swagger url
     }
 );
+
+//! CACHING
+builder.Services.AddResponseCaching();
 
 var app = builder.Build();
 
